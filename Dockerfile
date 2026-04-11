@@ -1,6 +1,10 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
+
 WORKDIR /app
 COPY . .
-RUN pip install --no-cache-dir streamlit langchain langchain-openai langgraph
+
+RUN pip install --no-cache-dir streamlit langgraph langchain-openai python-dotenv
+
 EXPOSE 8501
-CMD ["streamlit", "run", "dashboard.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+
+CMD ["streamlit", "run", "dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]
