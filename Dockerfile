@@ -1,9 +1,10 @@
 FROM python:3.11-slim
 
 WORKDIR /app
+
 COPY . .
 
-RUN pip install --no-cache-dir streamlit langgraph langchain-openai python-dotenv
+RUN pip install --no-cache-dir streamlit langgraph langchain langchain-openai langchain-anthropic python-dotenv sentence-transformers qdrant-client supabase langsmith
 
 EXPOSE 8501
 
