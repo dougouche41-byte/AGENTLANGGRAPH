@@ -1,55 +1,27 @@
-"""
-Interface visuelle : chat Streamlit branché sur agent.py.
-Lancement : streamlit run dashboard.py
-"""
-
-from __future__ import annotations
-
-import os
-
 import streamlit as st
-from dotenv import load_dotenv
-from langchain_core.messages import AIMessage, HumanMessage
+from agent import run_agent
 
-from agent import MODEL_NAME, new_user_message, reply
-
-load_dotenv()
-
-st.set_page_config(
-    page_title="TrustHariz — Assistant",
-    page_icon="💬",
-    layout="centered",
-)
+st.set_page_config(page_title="Assistant TrustHariz", page_icon="🤖", layout="centered")
 
 st.title("Assistant TrustHariz")
-st.caption(f"Modèle : **{MODEL_NAME}** (rapide et économique)")
+st.caption("Mode multi-agents : Chef + Finance + Mémoire")
 
-if not os.getenv("OPENAI_API_KEY", "").strip():
-    st.error(
-        "La clé API OpenAI est absente. Créez un fichier **.env** dans ce dossier avec :\n\n"
-        "`OPENAI_API_KEY=votre_clé`"
-    )
-    st.stop()
+user_input = st.text_area("Posez votre demande ici :", height=120)
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+if st.button("Lancer l'analyse"):
+    if not user_input.strip():
+        st.warning("Veuillez écrire une demande.")
+    else:
+        with st.spinner("Les agents travaillent..."):
+            result = run_agent(user_input)
 
-for msg in st.session_state.messages:
-    role = "user" if isinstance(msg, HumanMessage) else "assistant"
-    with st.chat_message(role):
-        st.markdown(msg.content)
+        st.subheader("Mission")
+        st.success(result["mission"])
 
-if prompt := st.chat_input("Posez votre question ici…"):
-    st.session_state.messages.append(new_user_message(prompt))
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    with st.chat_message("assistant"):
-        try:
-            with st.spinner("Réponse en cours…"):
-                answer: AIMessage = reply(st.session_state.messages)
-            st.markdown(answer.content)
-        except Exception as e:
-            st.error(f"Une erreur s'est produite : {e}")
-            answer = AIMessage(content="")
-        else:
-            st.session_state.messages.append(answer)
+        st.subheader("Finance")
+        st.info("Analyse financière")
+        st.json(result["finance"])
+
+        st.subheader("Mémoire")
+        st.info("Préparation mémoire")
+        st.json(result["memory"])
